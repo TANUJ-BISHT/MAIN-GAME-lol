@@ -2,26 +2,6 @@ import pygame
 import animation
 import level
 
-class Soldier(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale):
-        pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('Game/HeroKnight/Idle/HeroKnight_Idle_0.png')
-        self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
-        self.rect = self.image.get_rect(center = (x, y))
-    def draw(self,dir,movement):
-        if movement == 1:
-            screen.blit(ANIME.update(0.1,3,dir) ,player.rect)
-            #jump mechanism needed lol
-        elif movement == 2:
-            screen.blit(ANIME.update(0.1,2,dir) ,player.rect)
-            player.rect.x += 3
-        elif movement == 3:
-            screen.blit(ANIME.update(0.1,2,dir) ,player.rect)
-            player.rect.x -= 3
-        elif movement == 4:
-            screen.blit(ANIME.update(0.1,4,dir) ,player.rect)
-        else:
-            screen.blit(ANIME.update(0.1,1,dir) ,player.rect)
 class parallax(pygame.sprite.Sprite):
   def __init__(self):
     super().__init__()
@@ -30,6 +10,7 @@ class parallax(pygame.sprite.Sprite):
     self.ground_width = self.ground_image.get_width()
     self.ground_height = self.ground_image.get_height()
     self.bg_images = []
+    self.current_frame = 0
     for i in range(1, 6):
       self.bg_image = pygame.image.load(f"Game/Parallax/plx-{i}.png").convert_alpha()
       self.bg_image = pygame.transform.scale(self.bg_image,(1280,720))
@@ -42,13 +23,44 @@ class parallax(pygame.sprite.Sprite):
         screen.blit(i, ((x * self.bg_width) - self.scroll * speed, 0))
         speed += 0.2
 
+class Soldier(pygame.sprite.Sprite):
+    def __init__(self, x, y, scale):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load('Game/HeroKnight/Idle/HeroKnight_Idle_0.png')
+        self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+        self.rect = self.image.get_rect(center = (x, y))
+        self.jump = False
+        self.vel_y = 10
+    def draw(self,dir,movement):
+        if movement == 1 and self.jump is False:
+            self.jump = True
+        if self.jump is True:
+            player.rect.y -= self.vel_y * 4
+            self.vel_y -= 0.5
+            if self.vel_y < -10:
+                self.jump = False
+                self.vel_y = 10
+            screen.blit(ANIME.update(0.1,3,dir) ,player.rect)
+        elif movement == 2:
+            screen.blit(ANIME.update(0.1,2,dir) ,player.rect)
+            player.rect.x += 3
+        elif movement == 3:
+            screen.blit(ANIME.update(0.1,2,dir) ,player.rect)
+            player.rect.x -= 3
+        elif movement == 4:
+            screen.blit(ANIME.update(0.1,4,dir) ,player.rect)
+        else:
+            screen.blit(ANIME.update(0.1,1,dir) ,player.rect)
+        
+        
+
+
 ANIME = animation.Animation()        
 player = Soldier(600,300,4)
 world = level.World()
 bg_p = parallax()
 dir = 'xl'
 player.rect.x , player.rect.y = world.process_data(level.world_data)
-
 pygame.init()
 screen = pygame.display.set_mode((1280,720))
 pygame.display.set_caption('TANUJ YO')
@@ -69,6 +81,7 @@ while run:
 
     keys=pygame.key.get_pressed()
     if keys[pygame.K_LSHIFT]:
+        player.jump = True
         player.draw(dir,1)
     elif keys[pygame.K_d]:
         if bg_p.scroll < 3000:
@@ -86,5 +99,9 @@ while run:
         pass
     else:
         player.draw(dir,5)
+    player.rect.y += 2
+    if player.rect.y > 600:
+        player.rect.y = 600
+
     pygame.display.update()
     clock.tick(75)
