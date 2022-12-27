@@ -11,11 +11,14 @@ class Soldier(pygame.sprite.Sprite):
     def draw(self,dir,movement):
         if movement == 1:
             screen.blit(ANIME.update(0.1,3,dir) ,player.rect)
-        if movement == 2:
+            #jump mechanism needed lol
+        elif movement == 2:
             screen.blit(ANIME.update(0.1,2,dir) ,player.rect)
-        if movement == 3:
+            player.rect.x += 3
+        elif movement == 3:
             screen.blit(ANIME.update(0.1,2,dir) ,player.rect)
-        if movement == 4:
+            player.rect.x -= 3
+        elif movement == 4:
             screen.blit(ANIME.update(0.1,4,dir) ,player.rect)
         else:
             screen.blit(ANIME.update(0.1,1,dir) ,player.rect)
@@ -67,7 +70,7 @@ while run:
     keys=pygame.key.get_pressed()
     if keys[pygame.K_LSHIFT]:
         player.draw(dir,1)
-    if keys[pygame.K_d]:
+    elif keys[pygame.K_d]:
         if bg_p.scroll < 3000:
             bg_p.scroll += 5
         dir = 'xl'
@@ -84,4 +87,4 @@ while run:
     else:
         player.draw(dir,5)
     pygame.display.update()
-    clock.tick(100)
+    clock.tick(75)
